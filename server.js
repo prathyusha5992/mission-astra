@@ -69,29 +69,39 @@ app.get('/api/site-url', (req, res) => {
 });
 
 // ---------------- team save/load (players + scores) ----------------
-app.post('/api/teams', (req, res) => {
+app.post('/api/teams', async (req, res) => {
   const r = req.body || {};
   if (!r.id || !r.teamName) return res.status(400).json({ error: 'id and teamName required' });
-  db.saveTeam(r, getIp(req));
-  res.json({ ok: true });
+  try {
+    await db.saveTeam(r, getIp(req));
+    res.json({ ok: true });
+  } catch (e) {
+    console.error('saveTeam failed', e);
+    res.status(500).json({ error: 'save_failed' });
+  }
 });
 
 // ---------------- admin auth ----------------
 const LOGIN_WINDOW_MS = 10 * 60 * 1000;
 const MAX_ATTEMPTS = 8;
 
-app.post('/api/admin/login', (req, res) => {
-  const ip = getIp(req);
-  const attempts = db.recentFailedLogins(ip, LOGIN_WINDOW_MS);
-  if (attempts >= MAX_ATTEMPTS) {
-    return res.status(429).json({ error: 'Too many attempts. Try again later.' });
+app.post('/api/admin/login', async (req, res) => {
+  try {
+    const ip = getIp(req);
+    const attempts = await db.recentFailedLogins(ip, LOGIN_WINDOW_MS);
+    if (attempts >= MAX_ATTEMPTS) {
+      return res.status(429).json({ error: 'Too many attempts. Try again later.' });
+    }
+    const { password } = req.body || {};
+    const ok = typeof password === 'string' && password === ADMIN_PASSWORD;
+    await db.logAdminLogin(ip, ok);
+    if (!ok) return res.status(401).json({ error: 'Incorrect access code.' });
+    req.session.isAdmin = true;
+    res.json({ ok: true });
+  } catch (e) {
+    console.error('admin login failed', e);
+    res.status(500).json({ error: 'login_failed' });
   }
-  const { password } = req.body || {};
-  const ok = typeof password === 'string' && password === ADMIN_PASSWORD;
-  db.logAdminLogin(ip, ok);
-  if (!ok) return res.status(401).json({ error: 'Incorrect access code.' });
-  req.session.isAdmin = true;
-  res.json({ ok: true });
 });
 
 app.post('/api/admin/logout', (req, res) => {
@@ -108,8 +118,13 @@ function requireAdmin(req, res, next) {
 }
 
 // ---------------- admin data: teams ----------------
-app.get('/api/admin/teams', requireAdmin, (req, res) => {
-  res.json({ teams: db.listTeams() });
+app.get('/api/admin/teams', requireAdmin, async (req, res) => {
+  try {
+    res.json({ teams: await db.listTeams() });
+  } catch (e) {
+    console.error('listTeams failed', e);
+    res.status(500).json({ error: 'load_failed' });
+  }
 });
 
 // SPA fallback (Express 5 syntax)

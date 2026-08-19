@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MISSION ASTRA — Aeronautics &amp; Aerospace Club, GCET</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --void:#050810;
+  --panel:#0b1220;
+  --panel-2:#0f1a2c;
+  --line:#1c2b45;
+  --cyan:#5eead4;
+  --cyan-dim:#1f6f66;
+  --amber:#ffb454;
+  --saffron:#ff7a45;
+  --alert:#ff3b4e;
+  --text:#e9f1ff;
+  --text-dim:#8490b0;
+  --dim:#7d8bab;
+  --ok:#4ade80;
+  font-size:16px;
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+html,body{height:100%;}
+body{
+  background:var(--void);
+  color:var(--text);
+  font-family:'Space Grotesk',sans-serif;
+  overflow-x:hidden;
+  min-height:100vh;
+  position:relative;
+}
+.mono{font-family:'JetBrains Mono',monospace;}
+.display{font-family:'Orbitron',sans-serif;}
+
+/* ---------- starfield ---------- */
+#stars, #stars2, #stars3{
+  position:fixed; inset:0; z-index:0; pointer-events:none;
+}
+.earth-wrap{
+  position:fixed; right:-10vw; top:8vh; width:46vw; max-width:520px; opacity:.5;
+  z-index:0; pointer-events:none; filter:drop-shadow(0 0 60px rgba(94,234,212,.15));
+}
+.earth-wrap svg{animation:spin 90s linear infinite;}
+@keyframes spin{ to{ transform: rotate(360deg);} }
+
+@keyframes twinkle{
+  0%,100%{opacity:.25;}
+  50%{opacity:1;}
+}
+
+/* ---------- layout shell ---------- */
+#app{ position:relative; z-index:2; min-height:100vh; display:flex; flex-direction:column; }
+.wrap{ max-width:960px; margin:0 auto; padding:24px 20px 60px; width:100%; }
+.topbar{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px 20px; border-bottom:1px solid var(--line);
+  background:linear-gradient(180deg, rgba(11,18,32,.9), rgba(11,18,32,.4));
+  backdrop-filter:blur(6px);
+}
+.brand{ display:flex; align-items:center; gap:10px; font-family:'Orbitron',sans-serif; letter-spacing:.08em; font-size:.78rem; color:var(--cyan); }
+.brand .dot{ width:8px; height:8px; border-radius:50%; background:var(--cyan); box-shadow:0 0 10px var(--cyan); animation:twinkle 2s infinite;}
+
+/* ---------- buttons ---------- */
+.btn{
+  font-family:'Orbitron',sans-serif; font-size:.82rem; letter-spacing:.06em;
+  border:1px solid var(--cyan-dim); background:linear-gradient(180deg, rgba(94,234,212,.12), rgba(94,234,212,.02));
+  color:var(--cyan); padding:14px 26px; border-radius:6px; cursor:pointer;
+  text-transform:uppercase; transition:.15s; position:relative; overflow:hidden;
+}
+.btn:hover{ background:rgba(94,234,212,.2); box-shadow:0 0 24px rgba(94,234,212,.25); transform:translateY(-1px); }
+.btn:active{ transform:translateY(0); }
+.btn:disabled{ opacity:.35; cursor:not-allowed; }
+.btn.primary{
+  background:linear-gradient(180deg, #ff9d63, var(--saffron)); border-color:var(--saffron); color:#1a0900;
+  box-shadow:0 6px 24px rgba(255,122,69,.25);
+}
+.btn.primary:hover{ box-shadow:0 8px 30px rgba(255,122,69,.4); }
+.btn.ghost{ background:transparent; border-color:var(--line); color:var(--dim); }
+.btn.ghost:hover{ color:var(--text); border-color:var(--dim); background:rgba(255,255,255,.03);}
+.btn.danger{ border-color:#7a1f28; color:#ff8a94; background:rgba(255,59,78,.08);}
+.btn.big{ padding:20px 44px; font-size:1rem; }
+.btn.full{ width:100%; }
+
+/* ---------- panels/cards ---------- */
+.panel{
+  background:linear-gradient(180deg, var(--panel), var(--panel-2));
+  border:1px solid var(--line); border-radius:14px; padding:28px;
+  box-shadow: 0 0 0 1px rgba(255,255,255,.02) inset, 0 20px 60px rgba(0,0,0,.4);
+}
+.eyebrow{
+  font-family:'Orbitron',sans-serif; font-size:.68rem; letter-spacing:.18em; text-transform:uppercase;
+  color:var(--amber); margin-bottom:8px; display:flex; align-items:center; gap:8px;
+}
+.eyebrow::before{ content:''; width:16px; height:1px; background:var(--amber); }
+
+input[type=text]{
+  width:100%; background:#060b16; border:1px solid var(--line); color:var(--text);
+  padding:14px 16px; border-radius:8px; font-family:'Space Grotesk',sans-serif; font-size:1rem; outline:none;
+}
+input[type=text]:focus{ border-color:var(--cyan); box-shadow:0 0 0 3px rgba(94,234,212,.12); }
+label{ font-size:.78rem; color:var(--dim); text-transform:uppercase; letter-spacing:.06em; display:block; margin-bottom:6px;}
+
+/* ---------- home ---------- */
+.home-hero{ text-align:center; padding:10vh 20px 6vh; }
+.club-tag{
+  font-family:'Orbitron',sans-serif; font-size:.72rem; letter-spacing:.22em; color:var(--dim);
+  text-transform:uppercase; margin-bottom:22px;
+}
+.club-tag b{ color:var(--cyan); }
+.mission-title{
+  font-family:'Orbitron',sans-serif; font-weight:900; font-size:clamp(2.4rem,8vw,5rem);
+  letter-spacing:.05em; line-height:1; color:var(--text);
+  text-shadow:0 0 40px rgba(94,234,212,.35);
+}
+.mission-title span{ color:var(--saffron); text-shadow:0 0 40px rgba(255,122,69,.5); }
+.welcome-line{ font-family:'Orbitron',sans-serif; font-size:1.1rem; letter-spacing:.1em; color:var(--cyan); margin-top:18px;}
+.brief-copy{ max-width:560px; margin:22px auto 40px; color:var(--dim); font-size:1.02rem; line-height:1.7; }
+.rocket-pad{ position:relative; width:220px; height:260px; margin:0 auto 20px; }
+
+/* ---------- dashboard bar ---------- */
+.dash{
+  display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--line);
+  border:1px solid var(--line); border-radius:10px; overflow:hidden; margin-bottom:24px;
+}
+.dash > div{ background:var(--panel); padding:14px 16px; }
+.dash .k{ font-size:.65rem; letter-spacing:.1em; color:var(--dim); text-transform:uppercase; margin-bottom:4px;}
+.dash .v{ font-family:'JetBrains Mono',monospace; font-size:1.15rem; color:var(--cyan); }
+.dash .v.status-ok{ color:var(--ok);}
+.dash .v.status-alert{ color:var(--alert);}
+
+.progress-track{ height:8px; border-radius:6px; background:#0a1220; border:1px solid var(--line); overflow:hidden; margin-bottom:26px;}
+.progress-fill{ height:100%; background:linear-gradient(90deg, var(--cyan), var(--saffron)); transition:width .4s ease; box-shadow:0 0 12px rgba(94,234,212,.5);}
+
+/* ---------- question card ---------- */
+.q-type{ display:inline-block; font-family:'Orbitron',sans-serif; font-size:.62rem; letter-spacing:.14em; text-transform:uppercase;
+  padding:5px 10px; border-radius:20px; border:1px solid var(--cyan-dim); color:var(--cyan); margin-bottom:14px;}
+.q-type.scenario{ border-color:#7a5a1f; color:var(--amber); }
+.q-type.issue{ border-color:#7a2f2f; color:#ff9a9a; }
+.q-brief{ background:#060b16; border-left:3px solid var(--cyan-dim); padding:14px 16px; border-radius:6px; margin-bottom:14px; color:var(--dim); font-size:.92rem; line-height:1.6;}
+.q-problem{ font-style:italic; color:var(--amber); margin-bottom:16px; font-size:.92rem;}
+.q-prompt{ font-size:1.28rem; line-height:1.5; margin-bottom:24px; font-weight:500;}
+.options{ display:flex; flex-direction:column; gap:12px; }
+.opt{
+  text-align:left; background:#060b16; border:1px solid var(--line); border-radius:10px; padding:16px 18px;
+  color:var(--text); cursor:pointer; font-size:.98rem; display:flex; gap:14px; align-items:flex-start; transition:.15s;
+}
+.opt:hover{ border-color:var(--cyan); background:#08131f; }
+.opt .k{ font-family:'JetBrains Mono',monospace; color:var(--cyan); font-weight:700; flex-shrink:0; }
+.opt.selected{ border-color:var(--saffron); background:rgba(255,122,69,.08); }
+
+/* ---------- emergency ---------- */
+.emergency-screen{
+  position:fixed; inset:0; z-index:50; background:radial-gradient(circle at 50% 30%, #2a0509, #050810 70%);
+  display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:20px;
+  animation:flashbg 1s infinite;
+}
+@keyframes flashbg{ 0%,100%{ background-color:rgba(255,59,78,0);} 50%{ background-color:rgba(255,59,78,.08);} }
+.siren{ width:90px; height:90px; border-radius:50%; border:4px solid var(--alert); margin-bottom:24px;
+  box-shadow:0 0 40px var(--alert); animation:pulse 1s infinite; display:flex; align-items:center; justify-content:center;
+  font-family:'Orbitron',sans-serif; font-size:2rem; color:var(--alert);}
+@keyframes pulse{ 0%,100%{ transform:scale(1); opacity:1;} 50%{ transform:scale(1.12); opacity:.7;} }
+.emergency-title{ font-family:'Orbitron',sans-serif; font-size:clamp(1.4rem,5vw,2.4rem); color:var(--alert); letter-spacing:.05em; margin-bottom:16px; text-transform:uppercase;}
+.emergency-copy{ max-width:520px; color:var(--text); font-size:1.05rem; line-height:1.7; margin-bottom:30px;}
+.emergency-timer{ font-family:'JetBrains Mono',monospace; font-size:4rem; color:var(--alert); text-shadow:0 0 30px var(--alert);}
+
+/* ---------- launch/countdown ---------- */
+.launch-screen{ text-align:center; padding:8vh 20px; }
+.countdown-num{ font-family:'Orbitron',sans-serif; font-weight:900; font-size:clamp(6rem,22vw,12rem);
+  color:var(--saffron); text-shadow:0 0 60px rgba(255,122,69,.6); line-height:1;}
+.liftoff-stage{ min-height:70vh; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; position:relative; overflow:hidden;}
+.status-line{ font-family:'JetBrains Mono',monospace; color:var(--cyan); font-size:.95rem; margin-top:18px; letter-spacing:.04em;}
+
+/* ---------- success ---------- */
+.success-title{ font-family:'Orbitron',sans-serif; font-size:clamp(1.8rem,6vw,3rem); color:var(--ok); text-shadow:0 0 40px rgba(74,222,128,.5); margin-bottom:10px;}
+.confetti{ position:fixed; inset:0; z-index:60; pointer-events:none; overflow:hidden;}
+.confetti i{ position:absolute; top:-10px; width:8px; height:14px; opacity:.9; animation:fall linear forwards; }
+@keyframes fall{ to{ transform:translateY(110vh) rotate(540deg); opacity:0;} }
+
+.score-grid{ display:grid; grid-template-columns:1fr 1fr; gap:14px; margin:28px 0;}
+.score-box{ background:#060b16; border:1px solid var(--line); border-radius:10px; padding:20px; text-align:center;}
+.score-box .num{ font-family:'JetBrains Mono',monospace; font-size:2.2rem; color:var(--cyan);}
+.score-box .lbl{ font-size:.7rem; color:var(--dim); letter-spacing:.08em; text-transform:uppercase; margin-top:4px;}
+
+/* ---------- admin ---------- */
+table{ width:100%; border-collapse:collapse; font-size:.9rem; }
+th,td{ text-align:left; padding:12px 14px; border-bottom:1px solid var(--line); }
+th{ font-family:'Orbitron',sans-serif; font-size:.65rem; letter-spacing:.08em; text-transform:uppercase; color:var(--dim); }
+tr:hover td{ background:rgba(94,234,212,.04); }
+.badge{ font-family:'JetBrains Mono',monospace; font-size:.72rem; padding:4px 10px; border-radius:20px; border:1px solid var(--line); }
+.badge.launched{ color:var(--ok); border-color:#1f5a3a; background:rgba(74,222,128,.08);}
+.badge.progress{ color:var(--amber); border-color:#5a441f; background:rgba(255,180,84,.08);}
+
+.footer-note{ text-align:center; color:var(--dim); font-size:.75rem; margin-top:40px; letter-spacing:.03em;}
+.link-row{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:26px;}
+
+.overlay{ position:fixed; inset:0; background:rgba(2,4,10,.86); z-index:80; display:flex; align-items:center; justify-content:center; padding:20px; backdrop-filter:blur(4px);}
+.overlay .panel{ max-width:420px; width:100%; text-align:center; }
+#qrbox{ background:#fff; padding:14px; border-radius:10px; display:inline-block; margin:14px 0;}
+
+.player-row{ display:flex; gap:10px; margin-bottom:10px; }
+.player-row input{ flex:1; }
+.small{ font-size:.85rem; color:var(--dim); }
+
+@media(max-width:640px){
+  .dash{ grid-template-columns:repeat(2,1fr);}
+  .score-grid{ grid-template-columns:1fr; }
+}
+</style>
+</head>
+<body>
+
+<svg style="position:fixed;width:0;height:0" aria-hidden="true">
+  <defs>
+    <radialGradient id="gEarth" cx="35%" cy="30%" r="75%">
+      <stop offset="0%" stop-color="#2fd4c8"/>
+      <stop offset="45%" stop-color="#0f7a8c"/>
+      <stop offset="100%" stop-color="#041c2e"/>
+    </radialGradient>
+  </defs>
+</svg>
+
+<canvas id="stars"></canvas>
+<div class="earth-wrap" aria-hidden="true">
+  <svg viewBox="0 0 200 200" width="100%" height="100%">
+    <circle cx="100" cy="100" r="96" fill="url(#gEarth)" />
+    <path d="M40,60 Q60,50 80,65 Q95,55 110,70 Q90,90 70,85 Q50,95 40,60 Z" fill="#0d3b2e" opacity=".7"/>
+    <path d="M110,120 Q140,110 155,130 Q150,150 120,150 Q100,145 110,120 Z" fill="#0d3b2e" opacity=".7"/>
+    <circle cx="100" cy="100" r="96" fill="none" stroke="#5eead4" stroke-opacity=".25" stroke-width="1.5"/>
+  </svg>
+</div>
+
+<div id="app"></div>
+
+<script>
+/* =====================================================================
+   MISSION ASTRA — game engine
+===================================================================== */
+
+/* ---------------- starfield ---------------- */
+(function(){
+  const c = document.getElementById('stars');
+  const ctx = c.getContext('2d');
+  let stars = [];
+  function resize(){
+    c.width = window.innerWidth; c.height = window.innerHeight;
+    stars = [];
+    const n = Math.floor((c.width*c.height)/6000);
+    for(let i=0;i<n;i++){
+      stars.push({x:Math.random()*c.width, y:Math.random()*c.height, r:Math.random()*1.4+.2,
+        s:Math.random()*0.02+0.003, p:Math.random()*Math.PI*2});
+    }
+  }
+  function draw(t){
+    ctx.clearRect(0,0,c.width,c.height);
+    for(const st of stars){
+      const a = 0.35 + 0.65*Math.abs(Math.sin(st.p + t*st.s));
+      ctx.fillStyle = 'rgba(233,241,255,'+a.toFixed(3)+')';
+      ctx.beginPath(); ctx.arc(st.x, st.y, st.r, 0, 7); ctx.fill();
+    }
+    requestAnimationFrame(draw);
+  }
+  window.addEventListener('resize', resize);
+  resize(); requestAnimationFrame(draw);
+})();
+
+/* ---------------- audio (synth, no external files) ---------------- */
+let actx;
+function audioCtx(){ if(!actx){ try{ actx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } return actx; }
+function beep(freq, dur, type='sine', vol=.06, delay=0){
+  const ax = audioCtx(); if(!ax) return;
+  const o = ax.createOscillator(); const g = ax.createGain();
+  o.type = type; o.frequency.value = freq;
+  o.connect(g); g.connect(ax.destination);
+  const t0 = ax.currentTime + delay;
+  g.gain.setValueAtTime(0.0001, t0);
+  g.gain.exponentialRampToValueAtTime(vol, t0+0.02);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0+dur);
+  o.start(t0); o.stop(t0+dur+0.05);
+}
+function sirenTick(){ beep(880,.15,'square',.05); }
+function tickSound(){ beep(660,.08,'sine',.05); }
+function ignitionRumble(){
+  const ax = audioCtx(); if(!ax) return;
+  const o = ax.createOscillator(); const g = ax.createGain();
+  o.type='sawtooth'; o.frequency.setValueAtTime(60, ax.currentTime);
+  o.frequency.exponentialRampToValueAtTime(30, ax.currentTime+2.5);
+  g.gain.setValueAtTime(0.0001, ax.currentTime);
+  g.gain.exponentialRampToValueAtTime(.09, ax.currentTime+.3);
+  g.gain.exponentialRampToValueAtTime(0.0001, ax.currentTime+3);
+  o.connect(g); g.connect(ax.destination);
+  o.start(); o.stop(ax.currentTime+3.1);
+}
+function successChime(){ beep(523,.3,'sine',.05,0); beep(659,.3,'sine',.05,.15); beep(784,.5,'sine',.06,.3); }
+
+/* ---------------- QUESTION BANK ---------------- */
+const DIRECT = [
+{q:"Why might engineers choose a more expensive fuel type over a cheaper one for a specific mission?",
+ opts:["Expensive fuel always burns for a longer duration","It can offer better performance suited to that mission's specific needs","Cheaper fuel is against standard aerospace regulations","There's no real difference, it's just brand preference"],
+ correct:1, exp:"Fuel choice affects performance characteristics like efficiency and thrust — the performance benefit can outweigh the added cost for certain missions."},
+{q:"Why is it important to test a new instrument's effect on rocket balance before adding it close to launch?",
+ opts:["Untested weight changes can affect stability and flight performance","It's only a cosmetic requirement for mission reports","New instruments always weigh less than expected","Balance testing is optional if the instrument is small"],
+ correct:0, exp:"Any added mass, even from a small instrument, can shift the rocket's balance — testing before flight isn't optional."},
+{q:"A rocket has two engines producing equal thrust, but one has a slightly higher fuel consumption rate for the same output. Which engine is generally considered more \"efficient\" for mission planning purposes?",
+ opts:["The one with higher fuel consumption, since it can burn faster if needed","The one with lower fuel consumption for the same thrust output","Efficiency isn't affected by fuel consumption, only by thrust","Both are equally efficient since thrust output is identical"],
+ correct:1, exp:"Efficiency is measured by how much output (thrust) you get per unit of fuel used — not by raw thrust alone. Lower fuel use for the same thrust is more efficient."},
+{q:"A satellite's orbit is described as \"stable\" by one team and \"decaying very slowly\" by another, based on the same tracking data. Which statement is most accurate about these two descriptions?",
+ opts:["They're contradictory, and only one team can be correct","A slow decay can still be called \"stable\" over the relevant mission timeframe","\"Decaying\" and \"stable\" always mean opposite things regardless of timeframe","This can only be resolved by relaunching the satellite"],
+ correct:1, exp:"Orbital stability is often relative to a timeframe — a very slow decay may not meaningfully affect the mission's operational lifespan, so both descriptions can be reasonably accurate depending on context."},
+{q:"Two rockets have identical total mass, but Rocket A has more of its mass concentrated near the top, while Rocket B has more mass concentrated near the bottom. Which is generally considered more stable during flight?",
+ opts:["Rocket A, since a top-heavy design improves steering","Rocket B, since a lower center of mass improves stability","Both are equally stable since total mass is the same","Stability depends only on engine power, not mass distribution"],
+ correct:1, exp:"A lower center of mass generally makes a rocket more stable during flight, even if total mass is identical — mass distribution matters, not just the total."},
+{q:"A satellite is in a \"low Earth orbit\" and another is in a \"geostationary orbit.\" Which statement correctly compares them?",
+ opts:["The geostationary satellite orbits faster since it's farther away","The low Earth orbit satellite must travel faster to maintain its orbit","Both must travel at exactly the same speed regardless of altitude","Altitude has no effect on the orbital speed required"],
+ correct:1, exp:"Satellites closer to Earth need higher speeds to maintain orbit against stronger gravitational pull, while satellites farther away (like geostationary ones) orbit slower relative to their larger path."},
+{q:"A rocket engine burns fuel and oxidizer together to produce thrust. If a rocket is designed to fly beyond Earth's atmosphere, why can't it rely on outside air the way a jet engine does?",
+ opts:["Jet engines don't need oxygen either, so this isn't actually a difference","There's no air (oxygen) in space, so the rocket must carry its own oxidizer","Rockets don't produce thrust the same way jet engines do, so air isn't relevant","Rockets only need air during the final stage of flight, not throughout"],
+ correct:1, exp:"Jet engines use surrounding air for oxygen, but space has no air — so rockets must carry their own oxidizer onboard to burn fuel at any altitude, including in space."},
+{q:"Mission Control tracks a satellite's \"orbital period.\" If Satellite X has a shorter orbital period than Satellite Y, what does that most likely tell you?",
+ opts:["Satellite X is heavier than Satellite Y","Satellite X is orbiting closer to Earth than Satellite Y","Satellite X has a stronger signal than Satellite Y","Orbital period doesn't relate to distance from Earth"],
+ correct:1, exp:"A shorter orbital period generally means a satellite is closer to Earth, since it has less distance to travel to complete one orbit and experiences stronger gravitational pull."}
+];
+
+const SCENARIO = [
+{brief:"A cyclone is forecast near the coastal launch site. Two forecasting teams disagree: one predicts the storm will weaken before arrival, the other predicts it will strengthen. Both teams have similar track records.",
+ problem:"Mission Control must decide how to act with conflicting forecasts of similar reliability.",
+ opts:["Trust the team predicting it will weaken, since that's the more optimistic outcome","Delay the launch until one forecast is confirmed by fresh data","Trust the team predicting it will strengthen, since that's the safer assumption","Average the two predictions and launch based on that"],
+ correct:1, exp:"When two credible forecasts conflict, waiting for confirming data is safer than picking one to believe or averaging numbers that don't reflect a real outcome."},
+{brief:"The backup communication satellite is ready, but its last test was 3 months ago. The primary satellite is fully tested this week but has a known minor software bug that hasn't caused issues yet.",
+ problem:"Mission Control must weigh a recently-tested system with a known minor flaw against an older-tested system with no known flaws.",
+ opts:["Use the primary satellite since it was tested more recently","Use the backup satellite since it has no known bugs","Use both simultaneously without deciding which is primary","Delay launch until the backup is retested, even though the bug is minor"],
+ correct:0, exp:"Recent testing matters more than an untested assumption of \"no known flaws\" — the backup's clean record may just mean it hasn't been tested enough recently to catch anything."},
+{brief:"Air traffic control says the launch corridor will be clear for a 20-minute window. Mission Control's own tracking shows a slower-moving aircraft might still be in the zone for the first 5 minutes of that window.",
+ problem:"Mission Control must decide whose data to prioritize.",
+ opts:["Trust air traffic control's clearance and launch at the start of the window","Launch 5 minutes into the window, after the possible overlap passes","Ignore both data sources and launch at the exact midpoint of the window","Cancel the launch entirely due to the discrepancy"],
+ correct:1, exp:"Rather than blindly trusting one source or overreacting, adjusting the launch time to account for the overlap uses both pieces of information sensibly."},
+{brief:"A junior engineer proposes launching 2 hours earlier to avoid afternoon winds. A senior engineer says the original schedule allows more thorough final checks. Both have valid points, and there isn't enough time to do both fully.",
+ problem:"Mission Control must decide which priority — timing or thoroughness — matters more here.",
+ opts:["Launch earlier, avoiding wind risk is worth the shorter check time","Keep the original schedule, since incomplete checks are a bigger risk than wind","Split the difference and launch 1 hour early","Let the junior and senior engineer vote on it themselves"],
+ correct:1, exp:"Wind conditions are usually manageable within a range, but incomplete safety checks carry less predictable risk. Prioritizing thoroughness is the safer call."},
+{brief:"Ground crews report the launch pad's lightning protection system passed its test yesterday, but today's humidity levels are unusually high — a condition under which the system has never been specifically tested.",
+ problem:"Mission Control must decide whether yesterday's test still applies today.",
+ opts:["Trust yesterday's test result and proceed as scheduled","Run a quick supplementary check under today's humidity conditions","Cancel the launch entirely due to the untested condition","Assume humidity doesn't affect lightning protection systems"],
+ correct:1, exp:"A test under different conditions doesn't fully guarantee performance today. A quick supplementary check addresses the gap without overreacting to cancel outright."},
+{brief:"The mission's insurance provider recommends a more conservative launch window that ends 30 minutes before the weather team's own recommended safe window closes.",
+ problem:"Mission Control must decide whose window to follow when both have technical justification.",
+ opts:["Follow the insurance provider's window since it's more conservative","Follow the weather team's window since they have direct technical expertise on-site","Split the difference and use the midpoint of both windows","Ignore both and set an independent window without technical basis"],
+ correct:1, exp:"The weather team has direct, real-time technical expertise on current conditions, making their assessment the more reliable operational choice — even though the insurer's caution is reasonable, it isn't the technical authority here."},
+{brief:"A new tracking software update improves data accuracy by 15% but has only been in use for one week, compared to the old software's three years of reliable service.",
+ problem:"Mission Control must decide which system to trust for this mission.",
+ opts:["Use the new software since higher accuracy improves mission data","Run both systems in parallel for this mission and compare results","Use the old software exclusively since one week isn't enough proof","Alternate between both systems randomly during the mission"],
+ correct:1, exp:"Running both in parallel captures the new system's accuracy benefit while keeping the proven system as a safety net — a more balanced choice than picking one exclusively or randomly alternating."},
+{brief:"The mission director must choose between two identically qualified flight controllers for a key role. One has more experience with this exact rocket model; the other has more experience with this exact type of mission profile.",
+ problem:"Mission Control must weigh two different kinds of relevant experience.",
+ opts:["Choose the controller with rocket-model experience, since hardware familiarity matters most","Choose the controller with mission-profile experience, since it matches this specific mission's demands","Flip a coin since both are equally qualified","Assign both simultaneously to the same role without a clear lead"],
+ correct:1, exp:"Since the mission profile — not the general hardware — defines what this specific flight actually requires, matching experience to the mission's demands is the stronger fit."},
+{brief:"The mission's chief scientist wants to add one more day of testing on a new sensor, but the launch window that fits orbital requirements closes in exactly that same timeframe, and the next matching window isn't for another month.",
+ problem:"Mission Control must weigh sensor confidence against losing the launch window.",
+ opts:["Delay a month for the extra day of testing, since sensor confidence matters most","Launch within the current window, since the sensor isn't mission-critical to the core objective","Launch immediately without discussing the trade-off with the chief scientist","Cancel the mission entirely due to the scheduling conflict"],
+ correct:1, exp:"When a non-critical component creates a month-long delay risk, keeping the mission on schedule is usually the stronger call — as long as the sensor isn't essential to the core mission goal."},
+{brief:"Two independent weather stations report the same wind speed number, but one station is known to have a calibration drift issue that was fixed last month, while the other has always been reliable.",
+ problem:"Mission Control must decide how much confidence to place in the matching reading.",
+ opts:["Trust the reading fully since both stations agree","Verify with a third independent source given the recently-fixed station's history","Ignore the recently-fixed station's reading entirely going forward","Use only the historically reliable station's data and ignore the other"],
+ correct:1, exp:"Agreement between two sources is reassuring but not proof when one has a recent history of calibration issues — a third check adds real confidence rather than assuming the past issue is fully behind them."},
+{brief:"The ground crew reports the fueling process is 10 minutes behind schedule due to a slow valve, but they're confident they can still finish before the launch window opens if nothing else goes wrong.",
+ problem:"Mission Control must decide whether \"confident but behind schedule\" is acceptable to proceed on.",
+ opts:["Proceed on schedule and trust the crew's confidence","Build in a short buffer check closer to the window to confirm fueling is actually complete","Push the launch window back by a full hour immediately","Ignore the delay report since it's only 10 minutes"],
+ correct:1, exp:"Confirming completion closer to the actual window catches any further slippage without assuming everything will go perfectly or overreacting with an unnecessary hour-long delay."},
+{brief:"A team member flags that the mission patch (software update) fixes a known bug but hasn't been tested in the exact configuration being used for this mission, only in a similar one.",
+ problem:"Mission Control must decide whether \"similar\" testing is close enough.",
+ opts:["Apply the patch since it fixes a known bug","Run a quick configuration-specific test before applying it to this mission","Skip the patch entirely and keep the known bug","Apply the patch only after the mission is already underway"],
+ correct:1, exp:"\"Similar\" isn't the same as \"identical\" — a quick targeted test closes that gap, which is safer than assuming it'll behave the same or leaving a known bug unaddressed."},
+{brief:"The mission's primary objective is satellite deployment, but a secondary science experiment onboard needs an extra 15 minutes in a specific orientation that would delay deployment slightly.",
+ problem:"Mission Control must decide how to prioritize the primary objective against the secondary experiment.",
+ opts:["Delay deployment to accommodate the full 15 minutes for the experiment","Proceed with deployment on schedule, and see if a shorter window can still fit the experiment","Cancel the secondary experiment entirely to avoid any risk","Let the science team decide independently without checking impact on deployment"],
+ correct:1, exp:"Protecting the primary objective while still trying to accommodate the secondary goal within a shorter window balances both priorities, rather than fully sacrificing one for the other."},
+{brief:"A ground sensor and a satellite-based sensor give slightly different temperature readings for the same rocket component — both sensors have passed calibration this month.",
+ problem:"Mission Control must decide how to handle two recently-calibrated but disagreeing readings.",
+ opts:["Trust the ground sensor since it's physically closer to the component","Cross-check both readings against a third method before finalizing a decision","Trust the satellite sensor since it's a more advanced system","Average the two readings and use that as the final number"],
+ correct:1, exp:"When two properly-calibrated sensors disagree, a third independent check resolves the conflict more reliably than assuming one is automatically better or averaging numbers that may not represent reality."},
+{brief:"The launch schedule allows a 3-hour window. Historical data shows early-window launches have slightly better weather odds, but late-window launches allow more time for final equipment checks.",
+ problem:"Mission Control must decide which trade-off to prioritize for timing within the window.",
+ opts:["Launch early in the window to maximize weather odds","Launch later in the window to allow more thorough final checks","Launch exactly at the midpoint to balance both factors evenly","Ignore both factors and choose a time at random"],
+ correct:1, exp:"Thorough final checks address a controllable, verifiable risk, while weather odds are probabilistic — prioritizing the check time generally reduces more real risk than chasing slightly better odds."},
+{brief:"A senior flight director is unavailable for the final go/no-go call due to a family emergency. Their deputy has full authority to decide but has never made this call solo before.",
+ problem:"Mission Control must decide how to handle the leadership gap at a critical moment.",
+ opts:["Delay the entire mission until the senior director is available again","Let the deputy make the call, supported by the full team's input as usual","Cancel the mission since the senior director isn't present","Have the deputy make the call entirely alone, without team input, to avoid confusion"],
+ correct:1, exp:"The deputy has full authority and the team's standard support process still applies — removing team input or delaying/cancelling the mission overreacts to a role transition that the process already accounts for."}
+];
+
+const ISSUE = [
+{brief:"During pre-launch testing, Engine 3 shows a thrust reading 4% below the other three engines — still within the technically acceptable range, but the lowest of all four.",
+ problem:"Something's off, even if not technically a failure.",
+ opts:["Proceed since it's within the acceptable range","Run a focused diagnostic on Engine 3 before clearing it","Swap Engine 3 with a spare without checking first","Average all four readings and use that as the official number"],
+ correct:1, exp:"Being \"within range\" doesn't rule out an early-stage problem — a focused check on the outlier engine is the responsible fix, not ignoring it or swapping blind."},
+{brief:"The voice channel between Mission Control and the astronauts has static, and part of an instruction gets cut off mid-sentence.",
+ problem:"Something's broken in communication mid-mission.",
+ opts:["Guess the rest of the instruction based on context","Ask the crew to repeat the full instruction clearly","Proceed without that instruction since it's probably not critical","Switch to text-based backup without alerting the crew first"],
+ correct:1, exp:"Guessing a partial instruction risks a costly error. Directly confirming the full message is the reliable fix, and switching systems without notice adds confusion instead of clarity."},
+{brief:"A backup power cell shows a voltage reading slightly higher than its rated maximum, though it has operated at this level before without failing.",
+ problem:"Something's reading outside spec, even if it \"usually\" holds up.",
+ opts:["Continue using it since it has held up before at this level","Replace or recalibrate the cell rather than rely on past tolerance","Ignore the reading since it's only \"slightly\" above spec","Immediately disconnect all power systems as a precaution"],
+ correct:1, exp:"Past tolerance isn't a guarantee — operating outside rated spec is a real risk each time, even if it hasn't failed yet. Replacing or recalibrating addresses the actual issue."},
+{brief:"The satellite's primary antenna is transmitting data correctly, but at a slightly reduced signal strength that engineers can't yet explain.",
+ problem:"Something's degraded, with no clear cause identified yet.",
+ opts:["Ignore it since data is still transmitting successfully","Investigate the cause while continuing to monitor signal strength closely","Switch to the backup antenna immediately without diagnosing first","Boost transmission power to compensate without investigating"],
+ correct:1, exp:"An unexplained change should be investigated even if things still technically work — boosting power or switching systems without understanding the cause could mask or worsen an underlying problem."},
+{brief:"The rocket's guidance computer restarted on its own during final checks, then came back online normally with no errors logged.",
+ problem:"Something happened with no clear explanation left behind.",
+ opts:["Proceed since it came back online with no errors","Investigate the restart cause using external logs before clearing it","Replace the entire guidance computer without investigating","Restart it again to see if it happens a second time"],
+ correct:1, exp:"A self-resolved restart with no internal error log can still have an external cause worth investigating — clearing it without checking risks missing a recurring issue."},
+{brief:"The satellite's transmitter briefly sends a garbled data packet, then resumes sending clean data normally afterward.",
+ problem:"Something glitched once, with no repeat so far.",
+ opts:["Ignore it since normal transmission resumed","Flag it for monitoring and check if the pattern repeats before deciding further","Immediately switch to the backup transmitter","Shut down the transmitter until it can be replaced"],
+ correct:1, exp:"A single glitch with no repeat doesn't necessarily require drastic action, but it shouldn't be ignored either — monitoring for a pattern is the measured, correct response."},
+{brief:"The rocket's onboard clock is showing a time slightly out of sync with Mission Control's ground clock — a few milliseconds of drift.",
+ problem:"Something is misaligned, even if the amount seems tiny.",
+ opts:["Ignore it since a few milliseconds seems negligible","Resynchronize the clocks before proceeding, since timing precision matters for guidance systems","Replace the onboard clock hardware immediately","Delay launch by an hour to \"reset\" the systems"],
+ correct:1, exp:"Even small timing drifts can matter for systems relying on precise timing, like guidance and staging — resynchronizing directly addresses the issue without an unnecessary hardware swap or delay."},
+{brief:"A cooling fan inside a ground control console starts making an unusual rattling noise, but all displayed data and systems remain fully functional.",
+ problem:"Something sounds wrong, even though function seems unaffected right now.",
+ opts:["Ignore it since all systems are still functioning normally","Have a technician inspect the fan during a safe window, without pausing operations","Shut down the entire console immediately","Replace the whole console as a precaution"],
+ correct:1, exp:"An unusual sound worth flagging doesn't require dramatic action if function is unaffected — a scheduled inspection addresses it responsibly without unnecessary disruption or delay."}
+];
+
+/* ---------------- helpers ---------------- */
+function shuffle(arr){ const a=arr.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; }
+function pick(pool,n){ return shuffle(pool).slice(0,n); }
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+function fmtTime(ms){
+  if(ms<0) ms=0;
+  const s = Math.floor(ms/1000);
+  const m = Math.floor(s/60), r = s%60;
+  return String(m).padStart(2,'0')+':'+String(r).padStart(2,'0');
+}
+function esc(s){ return (s||'').replace(/[&<>]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+
+function buildTeamQuestions(){
+  const d = pick(DIRECT,2).map(x=>({type:'direct', ...x}));
+  const s = pick(SCENARIO,4).map(x=>({type:'scenario', ...x}));
+  const i = pick(ISSUE,2).map(x=>({type:'issue', ...x}));
+  const all = [...d,...s,...i];
+  // shuffle option order per question, tracking correct text
+  return all.map(q=>{
+    const correctText = q.opts[q.correct];
+    const opts = shuffle(q.opts);
+    return {...q, opts, correctText};
+  });
+}
+
+/* ---------------- storage helpers (talk to the real backend/DB) ---------------- */
+async function saveTeam(record){
+  try{
+    await fetch('/api/teams', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(record)
+    });
+  }catch(e){ console.error('save failed', e); }
+}
+async function loadAllTeams(){
+  try{
+    const res = await fetch('/api/admin/teams');
+    if(res.status===401) return {unauthorized:true, teams:[]};
+    const data = await res.json();
+    return {unauthorized:false, teams:data.teams||[]};
+  }catch(e){ return {unauthorized:false, teams:[]}; }
+}
+async function isAdminSession(){
+  try{ const res = await fetch('/api/admin/session'); const d = await res.json(); return !!d.isAdmin; }
+  catch(e){ return false; }
+}
+
+/* ---------------- app state ---------------- */
+// Admin password now lives server-side only (.env ADMIN_PASSWORD) — never shipped to the browser.
+
+let state = {
+  screen:'home',
+  teamId:null,
+  teamName:'',
+  players:['','','',''],
+  questions:[],
+  qIndex:0,
+  answers:[],
+  score:0,
+  startTime:null,
+  endTime:null,
+  emergencyDone:{},
+  timerHandle:null,
+};
+
+const app = document.getElementById('app');
+
+function go(screen){ state.screen = screen; render(); window.scrollTo({top:0,behavior:'instant'}); }
+
+/* ---------------- rocket svg (used on home + launch) ---------------- */
+function rocketSVG(flame){
+  return `
+  <svg viewBox="0 0 220 300" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="110" cy="280" rx="70" ry="10" fill="#0a1220"/>
+    <rect x="70" y="270" width="14" height="20" fill="#22344f"/>
+    <rect x="136" y="270" width="14" height="20" fill="#22344f"/>
+    <g>
+      <path d="M110 20 C140 55 150 110 150 190 L70 190 C70 110 80 55 110 20 Z" fill="#e9f1ff"/>
+      <path d="M110 20 C122 40 128 65 130 90 L90 90 C92 65 98 40 110 20 Z" fill="#ff7a45"/>
+      <rect x="70" y="190" width="80" height="55" rx="4" fill="#c9d6ee"/>
+      <path d="M70 190 L40 245 L70 235 Z" fill="#ff7a45"/>
+      <path d="M150 190 L180 245 L150 235 Z" fill="#ff7a45"/>
+      <circle cx="110" cy="130" r="16" fill="#5eead4" opacity=".85"/>
+      <circle cx="110" cy="130" r="16" fill="none" stroke="#08131f" stroke-width="2"/>
+      <text x="110" y="215" text-anchor="middle" font-family="Orbitron" font-size="13" fill="#08131f" font-weight="700">VIKRAM</text>
+    </g>
+    ${flame? `
+    <g>
+      <ellipse cx="110" cy="255" rx="22" ry="14" fill="#ffb454">
+        <animate attributeName="ry" values="14;30;14" dur="0.25s" repeatCount="indefinite"/>
+        <animate attributeName="rx" values="22;16;22" dur="0.25s" repeatCount="indefinite"/>
+      </ellipse>
+      <ellipse cx="110" cy="250" rx="12" ry="10" fill="#fff3d6">
+        <animate attributeName="ry" values="10;20;10" dur="0.2s" repeatCount="indefinite"/>
+      </ellipse>
+    </g>`:''}
+  </svg>`;
+}
+
+function topbar(){
+  return `<div class="topbar">
+    <div class="brand"><span class="dot"></span> AERONAUTICS &amp; AEROSPACE CLUB — GCET</div>
+    <div class="mono small">MISSION ASTRA</div>
+  </div>`;
+}
+
+/* ================= SCREEN: HOME ================= */
+function renderHome(){
+  app.innerHTML = `
+  ${topbar()}
+  <div class="wrap">
+    <div class="home-hero">
+      <div class="club-tag">Presented by <b>Aeronautics &amp; Aerospace Club</b> · GCET</div>
+      <div class="rocket-pad">${rocketSVG(false)}</div>
+      <div class="mission-title">MISSION<br><span>ASTRA</span></div>
+      <div class="welcome-line">WELCOME, ENGINEERS.</div>
+      <p class="brief-copy">
+        Mission ASTRA has been approved. Your team now runs Mission Control for India's newest satellite launch —
+        every call you make, from weather holds to engine diagnostics, decides whether ASTRA-1 reaches orbit.
+        Work fast, work sharp, and watch each other's backs — not everyone in the room has the mission's best interest at heart.
+      </p>
+      <button class="btn primary big" id="startBtn">🚀 Start Mission</button>
+      <div class="link-row">
+        <button class="btn ghost" id="qrBtn">Show join QR</button>
+        <button class="btn ghost" id="adminBtn">Admin dashboard</button>
+      </div>
+    </div>
+    <div class="footer-note">8 mission stages · scenarios randomized per team · no two teams see the same mission</div>
+  </div>`;
+  document.getElementById('startBtn').onclick = ()=>{ audioCtx(); go('setup'); };
+  document.getElementById('adminBtn').onclick = ()=> go('admin-login');
+  document.getElementById('qrBtn').onclick = ()=> showQR();
+}
+
+async function showQR(){
+  const overlay = document.createElement('div');
+  overlay.className='overlay';
+  overlay.innerHTML = `<div class="panel">
+    <div class="eyebrow">Join Mission Control</div>
+    <div class="display" style="font-size:1.1rem;margin-bottom:6px;">Scan to open Mission ASTRA</div>
+    <div id="qrbox" style="background:#fff;border-radius:8px;padding:12px;display:flex;align-items:center;justify-content:center;min-height:224px;">
+      <span class="mono small" style="color:#050810;">Loading QR…</span>
+    </div>
+    <div class="mono small" id="urlText" style="word-break:break-all;margin-top:10px;">Loading link…</div>
+    <button class="btn ghost full" id="closeQr" style="margin-top:16px;">Close</button>
+  </div>`;
+  document.body.appendChild(overlay);
+  document.getElementById('closeQr').onclick = ()=> overlay.remove();
+
+  // fetch the canonical site URL from the server (handles LAN IP / deployed domain correctly)
+  let siteUrl = location.href;
+  try{ const r = await fetch('/api/site-url'); const d = await r.json(); if(d.url) siteUrl = d.url; }catch(e){}
+  document.getElementById('urlText').textContent = siteUrl;
+
+  const qrbox = document.getElementById('qrbox');
+  const img = new Image();
+  img.width = 220; img.height = 220;
+  img.alt = 'QR code to join Mission Astra';
+  img.onload = ()=>{ qrbox.innerHTML=''; qrbox.appendChild(img); };
+  img.onerror = ()=>{ qrbox.innerHTML = '<div style="color:#050810;padding:20px;text-align:center;">QR unavailable — share the link below.</div>'; };
+  img.src = '/api/qr?t=' + Date.now();
+}
+
+/* ================= SCREEN: TEAM SETUP ================= */
+function renderSetup(){
+  app.innerHTML = `
+  ${topbar()}
+  <div class="wrap" style="max-width:640px;">
+    <div class="panel">
+      <div class="eyebrow">Crew Registration</div>
+      <div class="display" style="font-size:1.3rem;margin-bottom:20px;">Name your team &amp; crew</div>
+      <label>Team Name</label>
+      <input type="text" id="teamNameInput" placeholder="e.g. Team Orion" maxlength="40" style="margin-bottom:20px;">
+      <label>Crew Members (4–5)</label>
+      <div id="playersWrap"></div>
+      <div class="link-row" style="justify-content:flex-start;margin-top:6px;margin-bottom:24px;">
+        <button class="btn ghost" id="addPlayer" type="button">+ Add member</button>
+      </div>
+      <button class="btn primary full big" id="beginBtn">Begin Mission →</button>
+      <p class="small" style="margin-top:14px;">Timer starts the moment you begin. Your crew will secretly pick an Imposter chit offline before starting — the app doesn't need to know who it is.</p>
+    </div>
+  </div>`;
+  const wrap = document.getElementById('playersWrap');
+  function renderPlayers(){
+    wrap.innerHTML = state.players.map((p,i)=>`
+      <div class="player-row">
+        <input type="text" data-i="${i}" class="playerInput" placeholder="Crew member ${i+1} name" value="${esc(p)}" maxlength="30">
+        ${state.players.length>4 ? `<button class="btn ghost" data-remove="${i}" type="button" style="padding:10px 14px;">✕</button>`:''}
+      </div>`).join('');
+    wrap.querySelectorAll('.playerInput').forEach(inp=>{
+      inp.oninput = e=>{ state.players[+e.target.dataset.i] = e.target.value; };
+    });
+    wrap.querySelectorAll('[data-remove]').forEach(b=>{
+      b.onclick = ()=>{ state.players.splice(+b.dataset.remove,1); renderPlayers(); };
+    });
+  }
+  renderPlayers();
+  document.getElementById('addPlayer').onclick = ()=>{
+    if(state.players.length<5){ state.players.push(''); renderPlayers(); }
+  };
+  document.getElementById('teamNameInput').oninput = e=> state.teamName = e.target.value;
+
+  document.getElementById('beginBtn').onclick = ()=>{
+    const name = state.teamName.trim();
+    const players = state.players.map(p=>p.trim()).filter(Boolean);
+    if(!name){ alert('Enter a team name to continue.'); return; }
+    if(players.length<4){ alert('Enter at least 4 crew member names.'); return; }
+    state.players = players;
+    state.teamId = uid();
+    state.questions = buildTeamQuestions();
+    state.qIndex = 0;
+    state.answers = [];
+    state.score = 0;
+    state.startTime = Date.now();
+    state.emergencyDone = {};
+    saveTeam(currentRecord('in-progress'));
+    go('mission');
+  };
+}
+
+function currentRecord(status){
+  return {
+    id: state.teamId,
+    teamName: state.teamName,
+    players: state.players,
+    status,
+    startTime: state.startTime,
+    endTime: state.endTime || null,
+    score: state.score,
+    totalQuestions: state.questions.length,
+    answeredCount: state.answers.length,
+  };
+}
+
+/* ================= SCREEN: MISSION (questions) ================= */
+let missionTimerInt = null;
+function renderMission(){
+  const q = state.questions[state.qIndex];
+  const total = state.questions.length;
+  const pct = Math.round((state.qIndex/total)*100);
+  const typeLabel = q.type==='direct' ? 'Direct Question' : (q.type==='scenario' ? 'Scenario' : 'Systems Issue');
+  const typeClass = q.type==='direct' ? '' : q.type;
+
+  app.innerHTML = `
+  ${topbar()}
+  <div class="wrap">
+    <div class="dash">
+      <div><div class="k">Mission Progress</div><div class="v">${state.qIndex+1} / ${total}</div></div>
+      <div><div class="k">Mission Time</div><div class="v" id="missionTimer">00:00</div></div>
+      <div><div class="k">Team</div><div class="v" style="font-size:1rem;">${esc(state.teamName)}</div></div>
+      <div><div class="k">Status</div><div class="v status-ok">NOMINAL</div></div>
+    </div>
+    <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
+
+    <div class="panel">
+      <span class="q-type ${typeClass}">${typeLabel} · Stage ${state.qIndex+1}</span>
+      ${q.brief? `<div class="q-brief">${esc(q.brief)}</div>`:''}
+      ${q.problem? `<div class="q-problem">${esc(q.problem)}</div>`:''}
+      <div class="q-prompt">${esc(q.q || '')}</div>
+      <div class="options" id="optsWrap">
+        ${q.opts.map((o,i)=>`<button class="opt" data-i="${i}"><span class="k">${String.fromCharCode(65+i)}</span><span>${esc(o)}</span></button>`).join('')}
+      </div>
+    </div>
+  </div>`;
+
+  document.getElementById('optsWrap').querySelectorAll('.opt').forEach(btn=>{
+    btn.onclick = ()=>{
+      const i = +btn.dataset.i;
+      const chosen = q.opts[i];
+      const correct = chosen === q.correctText;
+      if(correct) state.score += 20;
+      state.answers.push({q:q.q||q.problem, chosen, correct});
+      const nextIndex = state.qIndex+1;
+      state.qIndex = nextIndex;
+      saveTeam(currentRecord('in-progress'));
+      if(nextIndex===3 && !state.emergencyDone[3]){ state.emergencyDone[3]=true; return go('emergency-3'); }
+      if(nextIndex===6 && !state.emergencyDone[6]){ state.emergencyDone[6]=true; return go('emergency-6'); }
+      if(nextIndex>=total){ return go('launch-ready'); }
+      go('mission');
+    };
+  });
+
+  startMissionTimer();
+}
+
+function startMissionTimer(){
+  clearInterval(missionTimerInt);
+  const el = ()=>document.getElementById('missionTimer');
+  missionTimerInt = setInterval(()=>{
+    const e = el();
+    if(!e){ clearInterval(missionTimerInt); return; }
+    e.textContent = fmtTime(Date.now()-state.startTime);
+  },1000);
+  const e = el(); if(e) e.textContent = fmtTime(Date.now()-state.startTime);
+}
+
+/* ================= SCREEN: EMERGENCY ================= */
+function renderEmergency(afterQ){
+  let seconds = 90;
+  app.innerHTML = `
+  <div class="emergency-screen">
+    <div class="siren">!</div>
+    <div class="emergency-title">Internal Sabotage Suspected</div>
+    <p class="emergency-copy">Mission Control suspects internal sabotage. Pause and discuss as a crew — who has been steering the team toward the wrong calls?</p>
+    <div class="emergency-timer mono" id="emTimer">01:30</div>
+    <div class="link-row" style="margin-top:30px;">
+      <button class="btn danger" id="skipEm">Discussion finished — resume mission</button>
+    </div>
+  </div>`;
+  const t0 = Date.now();
+  const int = setInterval(()=>{
+    const elapsed = Math.floor((Date.now()-t0)/1000);
+    const remain = Math.max(0, 90-elapsed);
+    document.getElementById('emTimer').textContent = fmtTime(remain*1000);
+    if(remain<=10 && remain>0) sirenTick();
+    if(remain<=0){ clearInterval(int); go('mission'); }
+  },1000);
+  document.getElementById('skipEm').onclick = ()=>{ clearInterval(int); go('mission'); };
+}
+
+/* ================= SCREEN: LAUNCH READY ================= */
+function renderLaunchReady(){
+  app.innerHTML = `
+  ${topbar()}
+  <div class="wrap launch-screen">
+    <div class="eyebrow" style="justify-content:center;">Final Authorization</div>
+    <div class="display" style="font-size:clamp(1.6rem,5vw,2.6rem);color:var(--cyan);margin:10px 0 20px;">LAUNCH AUTHORIZATION GRANTED</div>
+    <p class="brief-copy">All eight mission stages are complete. Vikram is fueled, aligned, and holding on the pad. When your crew is ready, initiate the launch sequence.</p>
+    <div class="rocket-pad" style="margin-top:20px;">${rocketSVG(false)}</div>
+    <button class="btn primary big" id="initBtn" style="margin-top:20px;">🚀 INITIATE LAUNCH</button>
+  </div>`;
+  document.getElementById('initBtn').onclick = ()=> go('countdown');
+}
+
+/* ================= SCREEN: COUNTDOWN ================= */
+function renderCountdown(){
+  app.innerHTML = `${topbar()}<div class="wrap launch-screen">
+    <div class="eyebrow" style="justify-content:center;">Ignition Sequence</div>
+    <div class="countdown-num" id="cdNum">10</div>
+    <div class="status-line">TELEMETRY NOMINAL · ALL SYSTEMS GO</div>
+  </div>`;
+  let n = 10;
+  const el = document.getElementById('cdNum');
+  const int = setInterval(()=>{
+    n--;
+    if(n>0){ el.textContent = n; tickSound(); }
+    else { clearInterval(int); ignitionRumble(); go('liftoff'); }
+  },900);
+}
+
+/* ================= SCREEN: LIFTOFF ================= */
+function renderLiftoff(){
+  app.innerHTML = `${topbar()}<div class="wrap">
+    <div class="liftoff-stage" id="liftoffStage">
+      <div id="rocketBox" style="width:180px;height:250px;position:relative;transition:transform 3.2s cubic-bezier(.45,0,.3,1);">${rocketSVG(true)}</div>
+      <div class="status-line" id="liftoffStatus">IGNITION…</div>
+    </div>
+  </div>`;
+  const box = document.getElementById('rocketBox');
+  const status = document.getElementById('liftoffStatus');
+  const stage = document.getElementById('liftoffStage');
+
+  // smoke puffs
+  for(let i=0;i<14;i++){
+    setTimeout(()=>{
+      const s = document.createElement('div');
+      const size = 40+Math.random()*60;
+      s.style.cssText = `position:absolute; bottom:20px; left:calc(50% + ${(Math.random()-0.5)*140}px); width:${size}px; height:${size}px; border-radius:50%; background:radial-gradient(circle, rgba(255,255,255,.5), rgba(180,190,210,0)); pointer-events:none; animation:smokeUp 2.4s ease-out forwards;`;
+      stage.appendChild(s);
+      setTimeout(()=>s.remove(),2500);
+    }, i*90);
+  }
+  const styleTag = document.createElement('style');
+  styleTag.textContent = `@keyframes smokeUp{ 0%{ transform:translateY(0) scale(.6); opacity:.8;} 100%{ transform:translateY(-120px) scale(1.6); opacity:0;} }`;
+  document.head.appendChild(styleTag);
+
+  setTimeout(()=>{ status.textContent='LIFT-OFF!'; box.style.transform='translateY(-520px) scale(.7)'; }, 500);
+  setTimeout(()=>{ status.textContent='MAX-Q · VEHICLE STABLE'; }, 1800);
+  setTimeout(()=>{ status.textContent='STAGE SEPARATION'; }, 2800);
+  setTimeout(()=>{ status.textContent='ASTRA-1 DEPLOYED TO ORBIT'; }, 3600);
+  setTimeout(()=>{
+    state.endTime = Date.now();
+    saveTeam(currentRecord('completed'));
+    successChime();
+    go('success');
+  }, 4200);
+}
+
+/* ================= SCREEN: SUCCESS ================= */
+function renderSuccess(){
+  const timeTaken = state.endTime - state.startTime;
+  app.innerHTML = `${topbar()}
+  <div class="confetti" id="confetti"></div>
+  <div class="wrap" style="text-align:center;padding-top:6vh;">
+    <div class="success-title">🛰️ MISSION SUCCESS</div>
+    <p class="brief-copy">ASTRA-1 has reached orbit. Mission Control, Aeronautics &amp; Aerospace Club GCET, confirms a successful launch.</p>
+    <div class="panel" style="max-width:520px;margin:26px auto;">
+      <div class="eyebrow" style="justify-content:center;">Mission Debrief — ${esc(state.teamName)}</div>
+      <div class="score-grid">
+        <div class="score-box"><div class="num">${state.score}</div><div class="lbl">Score / ${state.questions.length*20}</div></div>
+        <div class="score-box"><div class="num">${fmtTime(timeTaken)}</div><div class="lbl">Mission Time</div></div>
+      </div>
+      <p class="small">Now that you've launched, gather as a crew for the final debrief: discuss and reveal who held the Imposter chit.</p>
+      <button class="btn ghost full" id="doneBtn" style="margin-top:18px;">Finish</button>
+    </div>
+  </div>`;
+  launchConfetti();
+  document.getElementById('doneBtn').onclick = ()=>{
+    state = {screen:'home', teamId:null, teamName:'', players:['','','',''], questions:[], qIndex:0, answers:[], score:0, startTime:null, endTime:null, emergencyDone:{}};
+    go('home');
+  };
+}
+function launchConfetti(){
+  const c = document.getElementById('confetti');
+  const colors = ['#5eead4','#ffb454','#ff7a45','#4ade80','#e9f1ff'];
+  for(let i=0;i<80;i++){
+    const el = document.createElement('i');
+    el.style.left = Math.random()*100+'vw';
+    el.style.background = colors[Math.floor(Math.random()*colors.length)];
+    el.style.animationDuration = (2.5+Math.random()*2)+'s';
+    el.style.animationDelay = (Math.random()*0.6)+'s';
+    c.appendChild(el);
+  }
+  setTimeout(()=>{ if(c) c.remove(); }, 5000);
+}
+
+/* ================= SCREEN: ADMIN ================= */
+function renderAdminLogin(){
+  app.innerHTML = `${topbar()}
+  <div class="wrap" style="max-width:420px;">
+    <div class="panel">
+      <div class="eyebrow">Restricted Access</div>
+      <div class="display" style="font-size:1.2rem;margin-bottom:18px;">Mission Control Admin</div>
+      <label>Access Code</label>
+      <input type="text" id="pwInput" placeholder="Enter admin code" style="margin-bottom:16px;">
+      <button class="btn primary full" id="pwBtn">Enter Dashboard</button>
+      <button class="btn ghost full" id="backHome" style="margin-top:10px;">← Back</button>
+      <p class="small" id="pwErr" style="color:var(--alert);margin-top:10px;"></p>
+    </div>
+  </div>`;
+  document.getElementById('backHome').onclick = ()=> go('home');
+  document.getElementById('pwBtn').onclick = async ()=>{
+    const v = document.getElementById('pwInput').value;
+    const errEl = document.getElementById('pwErr');
+    errEl.textContent = '';
+    try{
+      const res = await fetch('/api/admin/login', {
+        method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({password:v})
+      });
+      if(res.ok){ go('admin'); return; }
+      const data = await res.json().catch(()=>({}));
+      errEl.textContent = data.error || 'Incorrect access code.';
+    }catch(e){ errEl.textContent = 'Could not reach server.'; }
+  };
+  document.getElementById('pwInput').onkeydown = e=>{ if(e.key==='Enter') document.getElementById('pwBtn').click(); };
+}
+
+let adminRefreshInt = null;
+async function renderAdmin(){
+  app.innerHTML = `${topbar()}
+  <div class="wrap">
+    <div class="eyebrow">Mission Control</div>
+    <div class="display" style="font-size:1.5rem;margin-bottom:6px;">Live Leaderboard</div>
+    <p class="small" style="margin-bottom:20px;">Auto-refreshes every 5s · sorted by score, then fastest time.</p>
+    <div id="adminPanelArea"></div>
+    <div class="link-row">
+      <button class="btn ghost" id="refreshBtn">Refresh now</button>
+      <button class="btn ghost" id="logoutBtn">Exit dashboard</button>
+    </div>
+  </div>`;
+  document.getElementById('logoutBtn').onclick = async ()=>{
+    clearInterval(adminRefreshInt);
+    try{ await fetch('/api/admin/logout', {method:'POST'}); }catch(e){}
+    go('home');
+  };
+  document.getElementById('refreshBtn').onclick = refreshAdminPanel;
+  await refreshAdminPanel();
+  clearInterval(adminRefreshInt);
+  adminRefreshInt = setInterval(refreshAdminPanel, 5000);
+}
+
+async function refreshAdminPanel(){
+  const area = document.getElementById('adminPanelArea');
+  if(!area) return;
+  return refreshTeamsPanel(area);
+}
+
+async function refreshTeamsPanel(area){
+  if(!area.querySelector('#teamBody')){
+    area.innerHTML = `<div class="panel" style="overflow-x:auto;">
+      <table id="teamTable"><thead><tr>
+        <th>#</th><th>Team</th><th>Crew</th><th>Status</th><th>Score</th><th>Time</th><th>Joined from IP</th>
+      </tr></thead><tbody id="teamBody"><tr><td colspan="7" class="small">Loading…</td></tr></tbody></table>
+    </div>`;
+  }
+  const body = document.getElementById('teamBody');
+  const {unauthorized, teams} = await loadAllTeams();
+  if(unauthorized){ go('admin-login'); return; }
+  teams.sort((a,b)=>{
+    if(b.score!==a.score) return b.score-a.score;
+    const ta = a.endTime? a.endTime-a.startTime : Infinity;
+    const tb = b.endTime? b.endTime-b.startTime : Infinity;
+    return ta-tb;
+  });
+  if(!teams.length){ body.innerHTML = `<tr><td colspan="7" class="small">No teams have started yet.</td></tr>`; return; }
+  body.innerHTML = teams.map((t,i)=>{
+    const timeStr = t.endTime? fmtTime(t.endTime-t.startTime) : (t.startTime? fmtTime(Date.now()-t.startTime)+' …' : '—');
+    const badge = t.status==='completed' ? `<span class="badge launched">Launched</span>` : `<span class="badge progress">In progress</span>`;
+    return `<tr>
+      <td class="mono">${i+1}</td>
+      <td>${esc(t.teamName)}</td>
+      <td class="small">${(t.players||[]).map(esc).join(', ')}</td>
+      <td>${badge}</td>
+      <td class="mono">${t.score}/${(t.totalQuestions||8)*20}</td>
+      <td class="mono">${timeStr}</td>
+      <td class="mono small">${esc(t.ip||'—')}</td>
+    </tr>`;
+  }).join('');
+}
+
+/* ---------------- router ---------------- */
+function render(){
+  clearInterval(missionTimerInt);
+  if(state.screen!=='admin') clearInterval(adminRefreshInt);
+  switch(state.screen){
+    case 'home': return renderHome();
+    case 'setup': return renderSetup();
+    case 'mission': return renderMission();
+    case 'emergency-3': return renderEmergency(3);
+    case 'emergency-6': return renderEmergency(6);
+    case 'launch-ready': return renderLaunchReady();
+    case 'countdown': return renderCountdown();
+    case 'liftoff': return renderLiftoff();
+    case 'success': return renderSuccess();
+    case 'admin-login': return renderAdminLogin();
+    case 'admin': return renderAdmin();
+    default: return renderHome();
+  }
+}
+render();
+</script>
+</body>
+</html>
