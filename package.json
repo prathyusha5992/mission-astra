@@ -1,0 +1,23 @@
+{
+  "name": "mission-astra",
+  "version": "1.0.0",
+  "description": "Mission ASTRA — Aeronautics & Aerospace Club GCET event app, with admin dashboard, visitor logging, and SQLite persistence.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "better-sqlite3": "^13.0.3",
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "express-session": "^1.19.0",
+    "qrcode": "^1.5.4"
+  }
+}
